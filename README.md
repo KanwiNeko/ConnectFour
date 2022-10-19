@@ -1,2 +1,2 @@
 # ConnectFour
-Proyecto fundamentos de programacion
+Proyecto de la universidad de un juego al estilo "Conecta 4"
