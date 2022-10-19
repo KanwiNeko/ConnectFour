@@ -79,7 +79,7 @@ def game():
     colum = 0
     myinput = None
 
-    while roundid <= ((len(grid)*len(grid[0]))-1):
+    while roundid <= ((len(grid)*len(grid[0]))):
         os.system('cls' if os.name == 'nt' else 'clear')
         myinput = None
         colum = 0
