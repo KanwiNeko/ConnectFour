@@ -95,6 +95,8 @@ def game():
                     continue
             elif myinput == "S" or myinput == "s":
                 colum = random.randint(1,7)
+                while grid[0][colum-1] != "•":
+                    colum = random.randint(1,7)
                 break
             else:
                 continue
