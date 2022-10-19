@@ -80,7 +80,6 @@ def game():
     myinput = None
 
     while roundid <= ((len(grid)*len(grid[0]))-1):
-        roundid += 1
         os.system('cls' if os.name == 'nt' else 'clear')
         myinput = None
         colum = 0
@@ -99,12 +98,17 @@ def game():
                 break
             else:
                 continue
+        if grid[0][colum-1] != "•":
+            print("Esta columna esta llena (presiona enter para continuar): ")
+            a = input()
+            continue
         for i in range(len(grid)):
             if grid[len(grid)-i-1][colum-1] == "•":
                 print("the spot is empty")
                 grid[len(grid)-i-1][colum-1] = player[currentPlayer].Token
                 break
         currentPlayer = (currentPlayer + 1) % 2
+        roundid += 1
     playagain = None
     while playagain == None:
         print("Desea jugar otra vez? [Y]/[N]: ")
