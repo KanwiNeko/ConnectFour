@@ -29,13 +29,14 @@ class Player:
         self.name = str(input(f"Hola jugador {str(iden + 1)}, porfavor indica tu nombre: "))
         self.token = None
         self.iden = iden
+        self.maxscore = 0
 
 
 def tokencall(name):
     token = ""
     while not (token.capitalize() == "X" or token.capitalize() == "O"):
         token = str(input(f"Hola {name}, porfavor escoge una ficha entre 'X' y 'O': "))
-    return token
+    return token.capitalize()
 
 
 def game():
@@ -51,14 +52,14 @@ def game():
 
     if player[0].token == "X":
         player[1].token = "O"
-    elif player[0].token == "O":
+    else:
         player[1].token = "X"
 
     print(f"{player[1].name}, vas a jugar con la ficha [{str(player[1].token)}] \n")
     print("Lanzando una moneda al aire para determinar quién inicia la partida...")
     current_player = random.randint(0, 1)
     print(f"la partida la inicia {player[current_player].name} \n")
-
+    input("presiona enter para comenzar")
     def printboard():
         def printlines():
             print("         +", end="")
@@ -83,6 +84,7 @@ def game():
         # print the line on the bottom of the board
         printlines()
         print("")
+        return
 
     roundid = 0
 
@@ -116,7 +118,7 @@ def game():
                         continue
             if currentcheck > maxcheck:
                 maxcheck = currentcheck
-        return maxcheck == 3
+        return maxcheck == 3, maxcheck
 
     game_won = False
     winning_player = None
@@ -144,22 +146,88 @@ def game():
             else:
                 continue
         if grid[0][colum - 1] != "•":
-            print("Esta columna esta llena (presiona enter para continuar): ")
-            a = input()
+            input("Esta columna esta llena (presiona enter para continuar): ")
             continue
         for i in range(len(grid)):
             if grid[len(grid) - i - 1][colum - 1] == "•":
                 grid[len(grid) - i - 1][colum - 1] = player[current_player].token
-                if checkwin(len(grid) - i - 1, colum - 1):
+                print(player[current_player].token)
+                won, localscore = checkwin(len(grid) - i - 1, colum - 1)
+                if localscore > player[current_player].maxscore:
+                    player[current_player].maxscore = localscore
+                if won:
                     game_won = True
                     winning_player = current_player
                 break
         current_player = (current_player + 1) % 2
         roundid += 1
+
+    def checkscore(points):
+        score = 0
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == "•":
+                    score += i
+        score -= 0.1*points*score
+        score = round(score)
+        return score
+
+    def score_handling(score, name):
+        savefile_data = []
+        scores = []
+        names = []
+        saves = None
+        file_exists = True
+        try:
+            saves = open("connectfour.c4sf", "r")
+            saves.close()
+        except:
+            file_exists = False
+            print("No existe un archivo de guardado, creando uno...")
+            scores = [score, 0, 0, 0, 0, 0]
+            names = [name, "", "", "", "", ""]
+            saves = open("connectfour.c4sf", "w")
+            for i in range(6):
+                scores[i] = "".join(str(scores[i]).splitlines())
+                saves.writelines(f'{scores[i]}\n')
+            for i in range(6):
+                names[i] = "".join(str(names[i]).splitlines())
+                saves.writelines(f'{names[i]}\n')
+
+
+        if file_exists:
+            saves = open("connectfour.c4sf", "r")
+            savefile_data = saves.readlines()
+            for i in range(6):
+                scores.append(int(savefile_data[i]))
+                names.append(savefile_data[i+6])
+            if score > scores[5]:
+                print(f'Felicidades {name}!, tu puntaje ha quedado en el podio!')
+                scores[5] = score
+                names[5] = name
+                scores, names = (list(t) for t in zip(*sorted(zip(scores, names))))
+                saves.close()
+                os.remove("connectfour.c4sf")
+                saves = open("connectfour.c4sf", "w")
+                for i in range(6):
+                    scores[i] = "".join(str(scores[i]).splitlines())
+                    saves.writelines(f'{scores[i]}\n')
+                for i in range(6):
+                    names[i] = "".join(str(names[i]).splitlines())
+                    saves.writelines(f'{names[i]}\n')
+        print("top 6 mejores puntajes:")
+        for i in range(6):
+            print(f'{i+1}. {names[5-i]}: {scores[5-i]}')
+
+
     os.system('cls' if os.name == 'nt' else 'clear')
     printboard()
     if game_won:
         print(f'Felicidades {player[winning_player].name}!, Has ganado el juego.')
+        losing_player = (winning_player + 1) % 2
+        winning_score = checkscore(player[losing_player].maxscore)
+        print(f'Tu puntaje es de: {winning_score} puntos!')
+        score_handling(winning_score, player[winning_player].name)
     playagain = None
     while playagain is None:
         print("Desea jugar otra vez? [Y]/[N]: ")
