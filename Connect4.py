@@ -1,4 +1,5 @@
 import random
+import json
 import os
 
 # for coloring inside the code
@@ -91,6 +92,8 @@ def game():
     def checkwin(row, column):
         cases = [vector2(1, 1), vector2(1, 0), vector2(1, -1), vector2(0, -1),
                  vector2(-1, -1), vector2(-1, 0), vector2(-1, 1), vector2(0, 1)]
+        direction_check = [0, 0, 0, 0]
+        directions = []
         checkcases = []
         for i in range(8):
             try:
@@ -100,9 +103,9 @@ def game():
             else:
                 if row + cases[i].x != -1 and column + cases[i].y != -1:
                     checkcases.append(cases[i])
+                    directions.append(i % 4)
         maxcheck = 0
         for i in range(len(checkcases)):
-            currentcheck = 0
             for j in range(1, 4):
                 try:
                     grid[row + checkcases[i].x*j][column + checkcases[i].y*j]
@@ -114,11 +117,12 @@ def game():
                     if grid[row + checkcases[i].x*j][column + checkcases[i].y*j] != player[current_player].token:
                         break
                     else:
-                        currentcheck += 1
+                        direction_check[directions[i]] += 1
                         continue
-            if currentcheck > maxcheck:
-                maxcheck = currentcheck
-        return maxcheck == 3, maxcheck
+            if direction_check[directions[i]] >= maxcheck:
+                maxcheck = direction_check[directions[i]]
+        print(f"maxcheck is 3 or more? {maxcheck >= 3}, it is {maxcheck}")
+        return maxcheck >= 3, maxcheck
 
     game_won = False
     winning_player = None
@@ -173,51 +177,48 @@ def game():
         return score
 
     def score_handling(score, name):
-        savefile_data = []
-        scores = []
-        names = []
-        saves = None
-        file_exists = True
+        # checking if the save file exists
         try:
-            saves = open("connectfour.c4sf", "r")
-            saves.close()
+            savefile = open('cfsd.json', 'r')
+            json.loads(savefile.read())
         except:
-            file_exists = False
-            print("No existe un archivo de guardado, creando uno...")
-            scores = [score, 0, 0, 0, 0, 0]
-            names = [name, "", "", "", "", ""]
-            saves = open("connectfour.c4sf", "w")
-            for i in range(6):
-                scores[i] = "".join(str(scores[i]).splitlines())
-                saves.writelines(f'{scores[i]}\n')
-            for i in range(6):
-                names[i] = "".join(str(names[i]).splitlines())
-                saves.writelines(f'{names[i]}\n')
+            print("Archivo de guardado inexsistene!, creando uno...")
+            savefile = open('cfsd.json', 'w')
+            json.dump([[0, 0, 0, 0, 0, 0], ["", "", "", "", "", ""]], savefile)
+            savefile.close()
 
+        save_file = open('cfsd.json', 'r')
+        with open('cfsd.json', 'r') as j:
+            save_data = json.loads(j.read())
+        save_scores = save_data[0]
+        save_names = save_data[1]
+        save_file.close()
 
-        if file_exists:
-            saves = open("connectfour.c4sf", "r")
-            savefile_data = saves.readlines()
-            for i in range(6):
-                scores.append(int(savefile_data[i]))
-                names.append(savefile_data[i+6])
-            if score > scores[5]:
-                print(f'Felicidades {name}!, tu puntaje ha quedado en el podio!')
-                scores[5] = score
-                names[5] = name
-                scores, names = (list(t) for t in zip(*sorted(zip(scores, names))))
-                saves.close()
-                os.remove("connectfour.c4sf")
-                saves = open("connectfour.c4sf", "w")
-                for i in range(6):
-                    scores[i] = "".join(str(scores[i]).splitlines())
-                    saves.writelines(f'{scores[i]}\n')
-                for i in range(6):
-                    names[i] = "".join(str(names[i]).splitlines())
-                    saves.writelines(f'{names[i]}\n')
-        print("top 6 mejores puntajes:")
+        if score > save_scores[0]:
+            save_scores[0] = score
+            save_names[0] = name
+
+            zipped = list(zip(save_scores, save_names))
+            zipped.sort()
+
+            res_score = [i for (i, s) in zipped]
+            res_names = [s for (i, s) in zipped]
+
+            print("Felicidades!, tu puntaje esta en el podio.")
+            save_file = open('cfsd.json', 'w')
+            json.dump([res_score, res_names], save_file)
+            save_file.close()
+
+        with open('cfsd.json', 'r') as j:
+            save_data = json.loads(j.read())
+        save_scores = save_data[0]
+        save_names = save_data[1]
+        save_file.close()
+
+        print('Mejores puntajes:')
         for i in range(6):
-            print(f'{i+1}. {names[5-i]}: {scores[5-i]}')
+            print(f'{i+1}. {save_names[5-i]}: {save_scores[5-i]}')
+
 
 
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -230,7 +231,8 @@ def game():
         score_handling(winning_score, player[winning_player].name)
     playagain = None
     while playagain is None:
-        print("Desea jugar otra vez? [Y]/[N]: ")
+        print("Desea jugar otra vez? [Y]/[N]: ", end="")
+        print("")
         sto1 = input()
         if sto1.capitalize() == "Y":
             playagain = True
