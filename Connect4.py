@@ -5,6 +5,12 @@ import os
 os.system("")
 
 
+class vector2:
+    def __init__(self, x_component, y_component):
+        self.x = x_component
+        self.y = y_component
+
+
 class Style:
     BLACK = '\033[30m'
     RED = '\033[31m'
@@ -20,14 +26,14 @@ class Style:
 
 class Player:
     def __init__(self, iden):
-        self.name = str(input(f"Hola jugador {str(iden+1)}, porfavor indica tu nombre: "))
+        self.name = str(input(f"Hola jugador {str(iden + 1)}, porfavor indica tu nombre: "))
         self.token = None
         self.iden = iden
 
 
 def tokencall(name):
-    token = None
-    while not(token == "X" or token == "O"):
+    token = ""
+    while not (token.capitalize() == "X" or token.capitalize() == "O"):
         token = str(input(f"Hola {name}, porfavor escoge una ficha entre 'X' y 'O': "))
     return token
 
@@ -59,6 +65,7 @@ def game():
             for i in range(len(grid[0])):
                 print("-", end="")
             print("+")
+
         print("")
         print("          1234567 ")
         # print the line on the top of the board
@@ -79,7 +86,42 @@ def game():
 
     roundid = 0
 
-    while roundid <= (len(grid)*len(grid[0])):
+    def checkwin(row, column):
+        cases = [vector2(1, 1), vector2(1, 0), vector2(1, -1), vector2(0, -1),
+                 vector2(-1, -1), vector2(-1, 0), vector2(-1, 1), vector2(0, 1)]
+        checkcases = []
+        for i in range(8):
+            try:
+                grid[row + cases[i].x][column + cases[i].y]
+            except:
+                pass
+            else:
+                if row + cases[i].x != -1 and column + cases[i].y != -1:
+                    checkcases.append(cases[i])
+        maxcheck = 0
+        for i in range(len(checkcases)):
+            currentcheck = 0
+            for j in range(1, 4):
+                try:
+                    grid[row + checkcases[i].x*j][column + checkcases[i].y*j]
+                except:
+                    break
+                else:
+                    if (row + checkcases[i].x*j == -1) or (column + checkcases[i].y*j == -1):
+                        break
+                    if grid[row + checkcases[i].x*j][column + checkcases[i].y*j] != player[current_player].token:
+                        break
+                    else:
+                        currentcheck += 1
+                        continue
+            if currentcheck > maxcheck:
+                maxcheck = currentcheck
+        return maxcheck == 3
+
+    game_won = False
+    winning_player = None
+
+    while roundid <= (len(grid) * len(grid[0])) and not game_won:
         os.system('cls' if os.name == 'nt' else 'clear')
         myinput = None
         colum = 0
@@ -96,27 +138,33 @@ def game():
                     continue
             elif myinput.capitalize() == "S":
                 colum = random.randint(1, 7)
-                while grid[0][colum-1] != "•":
+                while grid[0][colum - 1] != "•":
                     colum = random.randint(1, 7)
                 break
             else:
                 continue
-        if grid[0][colum-1] != "•":
+        if grid[0][colum - 1] != "•":
             print("Esta columna esta llena (presiona enter para continuar): ")
             a = input()
             continue
         for i in range(len(grid)):
-            if grid[len(grid)-i-1][colum-1] == "•":
-                print("the spot is empty")
-                grid[len(grid)-i-1][colum-1] = player[current_player].token
+            if grid[len(grid) - i - 1][colum - 1] == "•":
+                grid[len(grid) - i - 1][colum - 1] = player[current_player].token
+                if checkwin(len(grid) - i - 1, colum - 1):
+                    game_won = True
+                    winning_player = current_player
                 break
         current_player = (current_player + 1) % 2
         roundid += 1
+    os.system('cls' if os.name == 'nt' else 'clear')
+    printboard()
+    if game_won:
+        print(f'Felicidades {player[winning_player].name}!, Has ganado el juego.')
     playagain = None
     while playagain is None:
         print("Desea jugar otra vez? [Y]/[N]: ")
         sto1 = input()
-        if sto1.capitalize() == "y":
+        if sto1.capitalize() == "Y":
             playagain = True
         elif sto1.capitalize() == "N":
             playagain = False
