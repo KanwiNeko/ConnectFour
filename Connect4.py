@@ -1,5 +1,3 @@
-# TODO SUPER IMPORTANT, the wincheck function hasn't been implemented in the random part of the code, FIX ASAP!
-
 import random
 import os
 
