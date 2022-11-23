@@ -1,4 +1,5 @@
 (c) COPYRIGHT 2022 Katherine C.M. / twitter: @Kanwi_
+Traduccion de la licencia MIT por Katherine C.M / @Kanwi_
 
 Se da el permiso, libre de costo, a cualquier persona que posea una copia de
 este software y a archivos asociados, para modificar el software sin restriccion;
