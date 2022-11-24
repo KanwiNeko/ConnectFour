@@ -23,6 +23,7 @@ import random
 import json
 import os
 import pyfiglet
+import pyfiglet.fonts
 
 # Parte necesaria para usar el sistema de coloreado dentro de la terminal
 
@@ -192,7 +193,7 @@ def game():
     winning_player = None
 
     # Loop principal del juego, mientras el tablero no este lleno o nadie halla ganado
-    while roundid <= (len(grid) * len(grid[0])) and not game_won:
+    while roundid < (len(grid) * len(grid[0])) and not game_won:
         os.system('cls' if os.name == 'nt' else 'clear')
         # Variable de input del jugador y la columna que va a jugar
         myinput = None
@@ -260,7 +261,7 @@ def game():
     # fuente del codigo de reordenado
     # https://stackoverflow.com/questions/9764298/how-to-sort-two-lists-which-reference-each-other-in-the-exact-same-way
     def score_handling(score, name):
-        # checking if the save file exists
+        # revisa si existe un archivo de guardado
         try:
             savefile = open('cfsd.json', 'r')
             json.loads(savefile.read())
@@ -287,18 +288,17 @@ def game():
             res_score = [i for (i, s) in zipped]
             res_names = [s for (i, s) in zipped]
 
-            print("Felicidades!, tu puntaje esta en el podio. \n")
+            print(f"{Style.MAGENTA}Felicidades!, tu puntaje esta en el podio. \n{Style.RESET}")
             save_file = open('cfsd.json', 'w')
             json.dump([res_score, res_names], save_file)
             save_file.close()
 
+    # Metodo para imprimir el podio
+    def imprimir_podio():
         with open('cfsd.json', 'r') as j:
             save_data = json.loads(j.read())
         save_scores = save_data[0]
         save_names = save_data[1]
-        save_file.close()
-
-        # Imprimimos el podio
         print('Mejores puntajes:')
         for i in range(6):
             print(f'{i + 1}. {save_names[5 - i]}: {Style.YELLOW}{save_scores[5 - i]}{Style.RESET}')
@@ -313,9 +313,13 @@ def game():
         winning_score = checkscore(player[losing_player].maxscore)
         print(f'Tu puntaje es de: {Style.YELLOW}{winning_score}{Style.RESET} puntos!')
         score_handling(winning_score, player[winning_player].name)
+    else:
+        print("Ya no quedan espacios, fin del juego!")
+    # Imprime el podio al finalizar el juego
+    imprimir_podio()
     playagain = None
     while playagain is None:
-        print(f"Desea jugar otra vez? [{Style.GREEN}Y{Style.RESET}]/[{Style.RED}N{Style.RESET}]: ", end="")
+        print(f"\nDesea jugar otra vez? [{Style.GREEN}Y{Style.RESET}]/[{Style.RED}N{Style.RESET}]: ", end="")
         sto1 = input()
         if sto1.capitalize() == "Y":
             playagain = True
