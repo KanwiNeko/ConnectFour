@@ -3,8 +3,6 @@
 
 Programado por Katherine / Kanwi, [Stats].
 
-[![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=KanwiNeko&show_icons=true&theme=radical)](https://github.com/anuraghazra/github-readme-stats)
-
 ## Sobre el juego:
 - es una rendicion moderna del conocido juego [Connect Four], que se juega en la interfaz de consola de tu dispositivo.
 - esta disponible en Windows, MacOS y en Linux.
